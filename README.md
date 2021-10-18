@@ -1,5 +1,5 @@
 # health_care
-
+体調管理アプリを作ります。
 ## Project setup
 ```
 npm install
