@@ -23,6 +23,7 @@ export default class PrimaryButton extends Vue {
 
 <style>
 .btn a {
+  display: block;
   padding: 8px;
   text-decoration: none;
   background: #d4e2d4;
