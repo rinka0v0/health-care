@@ -24,7 +24,7 @@ export default {
 $almost-white: #f3f3f3;
 $almost-black: #df7861;
 $border: #cccccc;
-$left: 30px;
+$left: 25px;
 $size: 30px;
 
 @mixin centerer {
