@@ -8,10 +8,17 @@
 </template>
 
 <script lang="ts">
+import { CreateComponentPublicInstance } from "@vue/runtime-core";
 export default {
   props: ["showModal"],
   methods: {
-    clickEvent(): void {
+    clickEvent(
+      this: CreateComponentPublicInstance<
+        Readonly<{
+          showModal?: boolean;
+        }>
+      >
+    ): void {
       this.$emit("closeModal");
     },
   },
