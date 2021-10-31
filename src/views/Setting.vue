@@ -1,5 +1,5 @@
 <template>
-  <div>{{ date }}の記録</div>
+  <h3>{{ date }}の記録</h3>
 
   <div class="container">
     <div class="temperature">
@@ -54,10 +54,19 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import PrimaryRadio from "@/components/PrimaryRadio.vue";
+import { onAuthStateChanged } from "@firebase/auth";
+import { auth, db } from "../../firebase";
+import { doc, getDoc, setDoc } from "@firebase/firestore";
+import {
+  conditions,
+  headaches,
+  dizzys,
+  lowerBackPains,
+} from "@/constants/index";
 // 0: 良い 1:普通  2:悪い
 @Options({
   components: {
@@ -68,43 +77,58 @@ import PrimaryRadio from "@/components/PrimaryRadio.vue";
     return {
       date: this.$route.params.date,
       temperature: "",
-      conditions: [
-        { label: "良い", value: 0 },
-        { label: "普通", value: 1 },
-        { label: "悪い", value: 2 },
-      ],
-      condition: "",
-      headaches: [
-        { label: "激痛", value: 0 },
-        { label: "痛い", value: 1 },
-        { label: "少し痛い", value: 2 },
-      ],
-      headache: "",
-      dizzys: [
-        { label: "ふわふわ", value: 0 },
-        { label: "ガンガン", value: 1 },
-      ],
-      dizzy: "",
-      lowerBackPains: [
-        { label: "激痛", value: 0 },
-        { label: "痛い", value: 1 },
-        { label: "少し痛い", value: 2 },
-      ],
-      lowerBackPain: "",
-      test: "",
+
+      conditions,
+      condition: -1,
+
+      headaches,
+      headache: -1,
+
+      dizzys,
+      dizzy: -1,
+
+      lowerBackPains,
+      lowerBackPain: -1,
+
+      uid: "",
     };
   },
   methods: {
     handleSave() {
-      console.log(
-        this.temperature,
-        this.condition,
-        this.headache,
-        this.lowerBackPain,
-        this.dizzy
+      const result = this.date.split("-");
+      const ref = doc(db, this.uid, result[0], result[1], result[2]);
+
+      setDoc(
+        ref,
+        {
+          date: this.date,
+          temperature: this.temperature,
+          condition: this.condition,
+          headache: this.headache,
+          lowerBackPain: this.lowerBackPain,
+          dizzy: this.dizzy,
+        },
+        { merge: true }
       );
-      console.log("保存しました");
     },
+  },
+  created() {
+    onAuthStateChanged(auth, async (user) => {
+      const uid = user?.uid;
+      this.uid = uid;
+      // 記録データを取得してくる
+      const date = this.date.split("-");
+      const ref = doc(db, this.uid, date[0], date[1], date[2]);
+      const docSnap = await getDoc(ref);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        this.temperature = data.temperature;
+        this.condition = Number(data.condition);
+        this.headache = Number(data.headache);
+        this.lowerBackPain = Number(data.lowerBackPain);
+        this.dizzy = Number(data.dizzy);
+      }
+    });
   },
 })
 export default class Setting extends Vue {}
@@ -122,8 +146,6 @@ export default class Setting extends Vue {}
     transform: scale(1, 1);
   }
 }
-
-/* styles */
 
 $almost-white: #f3f3f3;
 $almost-black: #df7861;
@@ -148,15 +170,25 @@ body {
   color: $almost-black;
 }
 
+h3 {
+  margin: 0;
+  padding: 0.5em;
+}
+
 .container {
   @include centerer;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .tmp-container {
   display: flex;
   align-items: center;
+}
+
+#temperature {
+  margin-right: 0.5em;
 }
 
 label {
