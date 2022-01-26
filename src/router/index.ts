@@ -36,7 +36,6 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requireAuth);
   if (requiresAuth) {
     onAuthStateChanged(auth, (user) => {
-      console.log(user, "login");
       if (user) {
         next();
       } else {
@@ -45,8 +44,6 @@ router.beforeEach((to, from, next) => {
     });
   } else {
     onAuthStateChanged(auth, (user) => {
-      console.log(user, "logout");
-
       if (user) {
         next({ path: "/home" });
       } else {
