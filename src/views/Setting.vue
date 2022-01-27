@@ -1,4 +1,7 @@
 <template>
+  <div class="top">
+    <PrimaryButton value="⇦戻る" :onClick="backToDetailPage" class="back" />
+  </div>
   <h3>{{ date }}の記録</h3>
 
   <div class="container">
@@ -64,10 +67,11 @@ import { doc, getDoc, setDoc } from "@firebase/firestore";
 import {
   conditions,
   headaches,
-  dizzys,
+  dizzies,
   lowerBackPains,
 } from "@/constants/index";
-// 0: 良い 1:普通  2:悪い
+import router from "@/router";
+
 @Options({
   components: {
     PrimaryButton,
@@ -84,7 +88,7 @@ import {
       headaches,
       headache: -1,
 
-      dizzys,
+      dizzies,
       dizzy: -1,
 
       lowerBackPains,
@@ -110,6 +114,14 @@ import {
         },
         { merge: true }
       );
+    },
+    backToDetailPage() {
+      router.push(`/${this.date}`);
+    },
+  },
+  computed: {
+    userId() {
+      return this.$store.state.auth.userId;
     },
   },
   created() {
@@ -153,18 +165,20 @@ $border: #cccccc;
 $left: 30px;
 $size: 30px;
 
+.top {
+  display: flex;
+  .back {
+    margin: 1rem;
+    cursor: pointer;
+    user-select: none;
+  }
+}
+
 @mixin centerer {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
-// @mixin centerer {
-//   position: absolute;
-//   top: 50%;
-//   left: 50%;
-//   transform: translate(-50%, -50%);
-// }
 
 body {
   color: $almost-black;
