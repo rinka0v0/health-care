@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import PrimaryButton from "@/components/PrimaryButton.vue";
-import { signInWithGoogle } from "../../firebase";
+import { signInWithGoogle } from "@/utils/auth/index";
 
 @Options({
   components: {
@@ -17,10 +17,8 @@ import { signInWithGoogle } from "../../firebase";
 })
 export default class Index extends Vue {
   count = 0;
-  handleClick = (): void => {
-    // ログイン処理をここに書く
-    console.log("hello");
-    signInWithGoogle();
+  handleClick = async (): Promise<void> => {
+    await signInWithGoogle();
   };
 }
 </script>
