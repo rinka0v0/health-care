@@ -47,8 +47,9 @@ export default {
   z-index: 2;
   width: 50%;
   padding: 1em;
-  background: #fff;
+  background: #fcf8e8;
   position: relative;
+  border-radius: 8px;
   .close {
     padding: 0;
     position: absolute;
