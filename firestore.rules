@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+    match /databases/{database}/documents {
+        function isAuthenticated () {
+            return request.auth != null;
+        }
+        function isUserAuthenticated (userId) {
+            return isAuthenticated() && userId == request.auth.uid;
+        }
+        match /users/{userId} {
+            allow read: if isUserAuthenticated(userId);
+
+            allow delete: if isUserAuthenticated(userId);
+
+            allow create: if isUserAuthenticated(userId)
+            
+            allow update: if isUserAuthenticated(userId)
+
+            match /years/{year} {
+                allow read: if true
+
+                allow create: if isUserAuthenticated(userId)
+
+                allow update:  if isUserAuthenticated(userId)
+
+                allow delete: if isUserAuthenticated(userId)
+
+                match /months/{mouth} {
+                    allow read: if isUserAuthenticated(userId)
+
+                    allow create: if isUserAuthenticated(userId)
+
+                    allow update:  if isUserAuthenticated(userId)
+
+                    allow delete: if isUserAuthenticated(userId)
+                    
+                    match /days/{day} {
+                        allow read: if isUserAuthenticated(userId)
+
+                        allow create: if isUserAuthenticated(userId)
+
+                        allow update:  if isUserAuthenticated(userId)
+
+                        allow delete: if isUserAuthenticated(userId)
+
+                        match /memos/{memoId} {
+                            allow read: if isUserAuthenticated(userId)
+
+                            allow create: if isUserAuthenticated(userId)
+
+                            allow update:  if isUserAuthenticated(userId)
+
+                            allow delete: if isUserAuthenticated(userId)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
