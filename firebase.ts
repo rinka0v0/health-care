@@ -1,6 +1,5 @@
-import router from "@/router";
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,14 +15,3 @@ initializeApp(firebaseConfig);
 
 export const auth = getAuth();
 export const db = getFirestore();
-
-const provider = new GoogleAuthProvider();
-export const signInWithGoogle = (): void => {
-  signInWithRedirect(auth, provider)
-    .then(() => {
-      router.push("/home");
-    })
-    .catch((e) => {
-      console.log(e.message);
-    });
-};
