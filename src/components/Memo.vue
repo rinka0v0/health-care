@@ -13,8 +13,7 @@ export default {
 <style lang="scss" module>
 .memo_item {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 300px;
+  max-width: 250px;
   border-radius: 16px;
   padding: 1em;
   text-align: left;
