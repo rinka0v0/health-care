@@ -1,33 +1,22 @@
 <template>
-  <div class="memo-item">
+  <div :class="$style.memo_item">
     {{ content }}
-    <div>{{ date }}</div>
   </div>
 </template>
 
 <script lang="ts">
 export default {
-  props: ["content", "createdAt"],
-  computed: {
-    date(): string {
-      const result = this.createdAt.split("-");
-      return result[0] + "年" + result[1] + "月" + result[2] + "日";
-    },
-  },
+  props: ["content"],
 };
 </script>
 
-<style lang="scss" scoped>
-.memo-item {
+<style lang="scss" module>
+.memo_item {
+  box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 300px;
-  border: 1px solid #ddd;
+  border-radius: 16px;
   padding: 1em;
   text-align: left;
-  margin: 0 auto;
-  div {
-    text-align: right;
-    margin-top: 1em;
-  }
 }
 </style>
