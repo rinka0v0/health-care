@@ -197,6 +197,7 @@ export default class Detail extends Vue {}
 }
 .memo_wrapper {
   margin-top: 1rem;
+  width: 300px;
 }
 .textarea {
   color: #df7861;
