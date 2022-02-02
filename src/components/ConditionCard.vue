@@ -1,7 +1,9 @@
 <template>
   <div :class="$style.wrapper">
     <div :class="$style.label">{{ label }}</div>
-    <div :class="$style.content">{{ contentData }}</div>
+    <div :class="$style.content">
+      {{ contentData }} {{ temperature ? "℃" : "" }}
+    </div>
   </div>
 </template>
 
@@ -9,7 +11,7 @@
 import { Options, Vue } from "vue-class-component";
 
 @Options({
-  props: ["label", "contentData"],
+  props: ["label", "contentData", "temperature"],
   created() {
     console.log(this.label, this.contentData);
   },

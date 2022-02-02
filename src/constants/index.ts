@@ -36,3 +36,10 @@ export const lowerBackPains = [
   { label: "痛い", value: 1 },
   { label: "少し痛い", value: 2 },
 ];
+
+export const HEALTH_ITEM_LIST = {
+  headaches,
+  lowerBackPains,
+  dizzies,
+  condition: conditions,
+};

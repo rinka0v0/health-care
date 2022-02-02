@@ -8,8 +8,18 @@
 
     <div class="container">
       <div v-for="key in validKeys" :key="key">
-        <div class="health-info">
-          <conditionCard :label="LABELS[key]" :contentData="healthInfo[key]" />
+        <div class="health-info" v-if="key !== 'temperature'">
+          <conditionCard
+            :label="LABELS[key]"
+            :contentData="HEALTH_ITEM_LIST[key][healthInfo[key]]['label']"
+          />
+        </div>
+        <div class="health-info" v-else>
+          <conditionCard
+            :label="LABELS[key]"
+            :contentData="healthInfo[key]"
+            :temperature="true"
+          />
         </div>
       </div>
 
@@ -63,7 +73,7 @@ import {
 import Loading from "@/components/Loading.vue";
 import Memo from "@/components/Memo.vue";
 import { onSnapshot, DocumentData } from "@firebase/firestore";
-import { HEALTH_LABELS } from "@/constants/index";
+import { HEALTH_LABELS, HEALTH_ITEM_LIST } from "@/constants/index";
 import ConditionCard from "@/components/ConditionCard.vue";
 
 @Options({
@@ -84,6 +94,7 @@ import ConditionCard from "@/components/ConditionCard.vue";
       loading: false,
       healthInfo: {},
       LABELS: HEALTH_LABELS,
+      HEALTH_ITEM_LIST,
     };
   },
   async created() {
