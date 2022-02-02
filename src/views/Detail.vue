@@ -31,6 +31,8 @@
       />
 
       <h2>メモ📄</h2>
+      <div v-if="!memos.length">メモはありません</div>
+
       <div v-for="memo in memos" :key="memo.content" class="memo_wrapper">
         <Memo :content="memo.content" />
       </div>
