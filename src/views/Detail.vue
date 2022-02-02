@@ -7,6 +7,7 @@
     <h2>{{ date }}</h2>
 
     <div class="container">
+      <div v-if="!validKeys.length">まだ記録がありません</div>
       <div v-for="key in validKeys" :key="key">
         <div class="health-info" v-if="key !== 'temperature'">
           <conditionCard
@@ -91,7 +92,7 @@ import ConditionCard from "@/components/ConditionCard.vue";
       showModal: false,
       memos: [],
       memo: "",
-      loading: false,
+      loading: true,
       healthInfo: {},
       LABELS: HEALTH_LABELS,
       HEALTH_ITEM_LIST,
@@ -117,6 +118,8 @@ import ConditionCard from "@/components/ConditionCard.vue";
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      this.loading = false;
     }
   },
   computed: {
