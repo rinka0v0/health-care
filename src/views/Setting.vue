@@ -50,6 +50,9 @@
     <div>
       <h3>めまい</h3>
       <div style="display: flex">
+        <PrimaryRadio :options="dizzies" v-model="dizzy" name="dizzy" />
+      </div>
+      <div style="display: flex">
         <PrimaryRadio :options="dizzys" v-model="dizzy" name="dizzy" />
       </div>
     </div>
@@ -71,6 +74,11 @@ import {
   lowerBackPains,
 } from "@/constants/index";
 import router from "@/router";
+import {
+  Condition,
+  fetchCondition,
+  saveCondition,
+} from "@/utils/fetcher/firestore";
 
 @Options({
   components: {
@@ -80,39 +88,37 @@ import router from "@/router";
   data() {
     return {
       date: this.$route.params.date,
-      temperature: "",
+      temperature: null,
 
       conditions,
-      condition: -1,
+      condition: null,
 
       headaches,
-      headache: -1,
+      headache: null,
 
       dizzies,
-      dizzy: -1,
+      dizzy: null,
 
       lowerBackPains,
-      lowerBackPain: -1,
-
-      uid: "",
+      lowerBackPain: null,
     };
   },
   methods: {
-    handleSave() {
-      const result = this.date.split("-");
-      const ref = doc(db, this.uid, result[0], result[1], result[2]);
+    async handleSave() {
+      const condition: Condition = {
+        temperature: this.temperature,
+        condition: this.condition,
+        headaches: this.headache,
+        dizzies: this.dizzy,
+        lowerBackPains: this.lowerBackPain,
+      };
 
-      setDoc(
-        ref,
-        {
-          date: this.date,
-          temperature: this.temperature,
-          condition: this.condition,
-          headache: this.headache,
-          lowerBackPain: this.lowerBackPain,
-          dizzy: this.dizzy,
-        },
-        { merge: true }
+      const [year, month, day] = this.date.split("-");
+
+      await saveCondition(condition, this.userId, year, month, day).catch(
+        (err) => {
+          console.log(err);
+        }
       );
     },
     backToDetailPage() {
@@ -124,23 +130,23 @@ import router from "@/router";
       return this.$store.state.auth.userId;
     },
   },
-  created() {
-    onAuthStateChanged(auth, async (user) => {
-      const uid = user?.uid;
-      this.uid = uid;
-      // 記録データを取得してくる
-      const date = this.date.split("-");
-      const ref = doc(db, this.uid, date[0], date[1], date[2]);
-      const docSnap = await getDoc(ref);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        this.temperature = data.temperature;
-        this.condition = Number(data.condition);
-        this.headache = Number(data.headache);
-        this.lowerBackPain = Number(data.lowerBackPain);
-        this.dizzy = Number(data.dizzy);
-      }
-    });
+  async created() {
+    const [year, month, day] = this.date.split("-");
+
+    const fetchedCondition = await fetchCondition(
+      this.userId,
+      year,
+      month,
+      day
+    );
+    if (fetchedCondition) {
+      console.log(fetchedCondition);
+      this.condition = parseInt(fetchedCondition.condition);
+      this.dizzy = parseInt(fetchedCondition.dizzies);
+      this.headache = parseInt(fetchedCondition.headaches);
+      this.lowerBackPain = parseInt(fetchedCondition.lowerBackPains);
+      this.temperature = parseInt(fetchedCondition.temperature);
+    }
   },
 })
 export default class Setting extends Vue {}
