@@ -17,9 +17,22 @@
         v-for="(day, index) in week"
         :key="index"
         v-on:click="routerPush(day.month, day.date)"
-        :class="{ outside: currentMonth !== day.month }"
+        :class="{
+          outside: currentMonth !== day.month,
+          today:
+            thisMonth === currentMonth &&
+            today === day.date &&
+            currentMonth === day.month,
+        }"
       >
         {{ day.date }}
+
+        <!-- <div
+          class="content"
+          v-if="conditions[day.date.toString()] && day.month === currentMonth"
+        >
+          😵
+        </div> -->
       </div>
     </div>
   </div>
@@ -30,8 +43,10 @@ import { Options, Vue } from "vue-class-component";
 import moment from "moment";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import router from "@/router";
+import Loading from "@/components/Loading.vue";
 
 @Options({
+  // props: ["conditions"],
   data() {
     return {
       currentDate: moment(),
@@ -46,6 +61,12 @@ import router from "@/router";
     },
     currentMonth() {
       return this.currentDate.format("YYYY-MM");
+    },
+    thisMonth() {
+      return moment().format("YYYY-MM");
+    },
+    today() {
+      return parseInt(moment().format("D"));
     },
   },
   methods: {
@@ -100,6 +121,7 @@ import router from "@/router";
   },
   components: {
     PrimaryButton,
+    Loading,
   },
 })
 export default class Calendar extends Vue {}
@@ -126,7 +148,7 @@ export default class Calendar extends Vue {}
   display: flex;
   border-left: 1px solid #df7861;
 }
-.row div {
+.row > div {
   flex: 1;
   min-height: 125px;
   border-right: 1px solid #df7861;
@@ -139,9 +161,16 @@ export default class Calendar extends Vue {}
   background-color: #ddd;
   /* background-color: #f7f7f7; */
 }
+.today {
+  background-color: #efd7d3;
+}
 @media screen and (max-width: 480px) {
   .row div {
     min-height: 60px;
   }
+}
+.content {
+  width: 100%;
+  height: 100%;
 }
 </style>
