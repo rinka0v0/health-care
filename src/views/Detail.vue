@@ -3,44 +3,25 @@
     <div class="top">
       <PrimaryButton value="⇦戻る" class="back" :onClick="backToHomePage" />
     </div>
+
     <h2>{{ date }}</h2>
 
     <div class="container">
-      <div class="flex list">
-        <div>体温</div>
-        <div>36.8℃</div>
+      <div v-for="key in validKeys" :key="key">
+        <div class="health-info">
+          <conditionCard :label="LABELS[key]" :contentData="healthInfo[key]" />
+        </div>
       </div>
-      <div class="flex list">
-        <div>体調</div>
-        <div>良い😀</div>
-      </div>
-      <div class="flex list">
-        <div>吐き気</div>
-        <div>ひどい</div>
-      </div>
-      <div class="flex list">
-        <div>めまい</div>
-        <div>ひどい</div>
-      </div>
-      <div class="flex list">
-        <div>頭痛</div>
-        <div>ひどい</div>
-      </div>
-      <div class="flex list">
-        <div>気分</div>
-        <div>ひどい</div>
-      </div>
+
       <PrimaryButton
         value="記録する"
         class="primary-button"
         :onClick="routerPush"
       />
-      <h2>メモ📄</h2>
 
-      <div v-for="memo in memos" :key="memo.content">
-        <div class="memo_wrapper">
-          <Memo :content="memo.content" />
-        </div>
+      <h2>メモ📄</h2>
+      <div v-for="memo in memos" :key="memo.content" class="memo_wrapper">
+        <Memo :content="memo.content" />
       </div>
 
       <PrimaryButton
@@ -74,16 +55,24 @@ import { Options, Vue } from "vue-class-component";
 import PrimaryButton from "../components/PrimaryButton.vue";
 import Modal from "@/components/Modal.vue";
 import { STATIC_ROUTES } from "@/router/routes";
-import { getMemosRef, saveMemo } from "@/utils/fetcher/firestore";
+import {
+  fetchCondition,
+  getMemosRef,
+  saveMemo,
+} from "@/utils/fetcher/firestore";
 import Loading from "@/components/Loading.vue";
 import Memo from "@/components/Memo.vue";
 import { onSnapshot, DocumentData } from "@firebase/firestore";
+import { HEALTH_LABELS } from "@/constants/index";
+import ConditionCard from "@/components/ConditionCard.vue";
+
 @Options({
   components: {
     PrimaryButton,
     Modal,
     Memo,
     Loading,
+    ConditionCard,
   },
   data() {
     return {
@@ -93,6 +82,8 @@ import { onSnapshot, DocumentData } from "@firebase/firestore";
       memos: [],
       memo: "",
       loading: false,
+      healthInfo: {},
+      LABELS: HEALTH_LABELS,
     };
   },
   async created() {
@@ -108,6 +99,11 @@ import { onSnapshot, DocumentData } from "@firebase/firestore";
           this.memos = memos;
         }
       );
+
+      const data = await fetchCondition(this.userId, year, month, day);
+      if (data) {
+        this.healthInfo = data;
+      }
     } catch (error) {
       console.error(error);
     }
@@ -119,6 +115,17 @@ import { onSnapshot, DocumentData } from "@firebase/firestore";
     },
     userId() {
       return this.$store.state.auth.userId;
+    },
+    validKeys() {
+      if (this.healthInfo) {
+        const validKeys: string[] = [];
+        Object.keys(HEALTH_LABELS).map((key) => {
+          if (this.healthInfo[key]) {
+            validKeys.push(key);
+          }
+        });
+        return validKeys;
+      }
     },
   },
   methods: {
@@ -186,6 +193,9 @@ export default class Detail extends Vue {}
   width: 100%;
   font-size: 1.2em;
 }
+.health-info {
+  width: 300px;
+}
 .primary-button {
   margin: 2em;
 }
@@ -197,7 +207,7 @@ export default class Detail extends Vue {}
 }
 .memo_wrapper {
   margin-top: 1rem;
-  width: 300px;
+  width: 250px;
 }
 .textarea {
   color: #df7861;
