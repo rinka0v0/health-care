@@ -3,10 +3,14 @@ import {
   addDoc,
   collection,
   CollectionReference,
+  doc,
   DocumentData,
+  DocumentReference,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   where,
 } from "firebase/firestore";
 
@@ -43,40 +47,6 @@ export const defaultConditions = {
   "30": 0,
   "31": 0,
 };
-
-// const defaultConditions = {
-//   1: null,
-//   2: null,
-//   3: null,
-//   4: null,
-//   5: null,
-//   6: null,
-//   7: null,
-//   8: null,
-//   9: null,
-//   10: null,
-//   11: null,
-//   12: null,
-//   13: null,
-//   14: null,
-//   15: null,
-//   16: null,
-//   17: null,
-//   18: null,
-//   19: null,
-//   20: null,
-//   21: null,
-//   22: null,
-//   23: null,
-//   24: null,
-//   25: null,
-//   26: null,
-//   27: null,
-//   28: null,
-//   29: null,
-//   30: null,
-//   31: null,
-// };
 
 type DateNumber = keyof typeof defaultConditions;
 
@@ -117,42 +87,6 @@ export const fetchConditions = async (
   return conditions;
 };
 
-export const fetchCondition = async (
-  userId: string,
-  year: string,
-  month: string,
-  day: string
-): Promise<DocumentData | undefined> => {
-  const docRef = collection(
-    db,
-    "users",
-    userId,
-    "years",
-    year,
-    "months",
-    month,
-    "day",
-    day,
-    "memos"
-  );
-  const docSnap = await getDocs(docRef);
-  console.log(docSnap, "docSnap");
-
-  if (!docSnap.empty) {
-    const memos: DocumentData[] = [];
-    docSnap.forEach((doc) => {
-      const memoData = doc.data();
-      memos.push({
-        content: memoData.content,
-        createdAt: memoData.createdAt,
-      });
-    });
-    return memos;
-  } else {
-    return undefined;
-  }
-};
-
 export const getMemosRef = (
   userId: string,
   year: string,
@@ -185,6 +119,70 @@ export const saveMemo = async (
       content,
       createdAt: serverTimestamp(),
     });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
+    }
+  }
+};
+
+export const getConditionRef = (
+  userId: string,
+  year: string,
+  month: string,
+  day: string
+): DocumentReference<DocumentData> => {
+  return doc(db, "users", userId, "years", year, "months", month, "days", day);
+};
+
+export type Condition = {
+  temperature: number | null;
+  condition: number | null;
+  headaches: number | null;
+  dizzies: number | null;
+  lowerBackPains: number | null;
+};
+
+export const fetchCondition = async (
+  userId: string,
+  year: string,
+  month: string,
+  day: string
+): Promise<DocumentData | undefined> => {
+  try {
+    const docSnap = await getDoc(getConditionRef(userId, year, month, day));
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
+    }
+  }
+};
+export const saveCondition = async (
+  condition: Condition,
+  userId: string,
+  year: string,
+  month: string,
+  day: string
+): Promise<void> => {
+  try {
+    console.log(condition);
+    console.log(userId, year, month, day, "test!!");
+
+    await setDoc(
+      getConditionRef(userId, year, month, day),
+      {
+        temperature: condition?.temperature,
+        condition: condition?.condition,
+        headaches: condition?.headaches,
+        dizzies: condition?.dizzies,
+        lowerBackPains: condition?.lowerBackPains,
+        createdAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.message);
