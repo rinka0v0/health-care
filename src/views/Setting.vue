@@ -7,9 +7,11 @@
   <div class="container">
     <div class="temperature">
       <h3>体温</h3>
+
       <div class="tmp-container">
         <input
-          type="text"
+          step="0.1"
+          type="number"
           id="temperature"
           placeholder="体温を入力"
           v-model="temperature"
@@ -51,9 +53,6 @@
       <h3>めまい</h3>
       <div style="display: flex">
         <PrimaryRadio :options="dizzies" v-model="dizzy" name="dizzy" />
-      </div>
-      <div style="display: flex">
-        <PrimaryRadio :options="dizzys" v-model="dizzy" name="dizzy" />
       </div>
     </div>
     <PrimaryButton value="保存" :onClick="handleSave" class="primary-button" />
@@ -151,12 +150,12 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
       day
     );
     if (fetchedCondition) {
-      console.log(fetchedCondition);
       this.condition = parseInt(fetchedCondition.condition);
       this.dizzy = parseInt(fetchedCondition.dizzies);
       this.headache = parseInt(fetchedCondition.headaches);
       this.lowerBackPain = parseInt(fetchedCondition.lowerBackPains);
-      this.temperature = parseInt(fetchedCondition.temperature);
+      // 体温は小数
+      this.temperature = parseFloat(fetchedCondition.temperature);
     }
   },
 })
@@ -231,7 +230,7 @@ label {
   width: 80px;
 }
 
-input[type="text"] {
+input[type="number"] {
   width: 100%;
   border: 2px solid $border;
   border-radius: 4px;
