@@ -12,9 +12,6 @@ import { Options, Vue } from "vue-class-component";
 
 @Options({
   props: ["label", "contentData", "temperature"],
-  created() {
-    console.log(this.label, this.contentData);
-  },
 })
 export default class ConditionCard extends Vue {}
 </script>
