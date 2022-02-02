@@ -57,6 +57,10 @@
       </div>
     </div>
     <PrimaryButton value="保存" :onClick="handleSave" class="primary-button" />
+
+    <div v-if="errorMessage">
+      <ErrorMessage :message="errorMessage" />
+    </div>
   </div>
 </template>
 
@@ -64,9 +68,6 @@
 import { Options, Vue } from "vue-class-component";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import PrimaryRadio from "@/components/PrimaryRadio.vue";
-import { onAuthStateChanged } from "@firebase/auth";
-import { auth, db } from "../../firebase";
-import { doc, getDoc, setDoc } from "@firebase/firestore";
 import {
   conditions,
   headaches,
@@ -79,11 +80,13 @@ import {
   fetchCondition,
   saveCondition,
 } from "@/utils/fetcher/firestore";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 
 @Options({
   components: {
     PrimaryButton,
     PrimaryRadio,
+    ErrorMessage,
   },
   data() {
     return {
@@ -101,25 +104,33 @@ import {
 
       lowerBackPains,
       lowerBackPain: null,
+      errorMessage: "",
     };
   },
   methods: {
     async handleSave() {
-      const condition: Condition = {
-        temperature: this.temperature,
-        condition: this.condition,
-        headaches: this.headache,
-        dizzies: this.dizzy,
-        lowerBackPains: this.lowerBackPain,
-      };
+      try {
+        const condition: Condition = {
+          temperature: this.temperature,
+          condition: this.condition,
+          headaches: this.headache,
+          dizzies: this.dizzy,
+          lowerBackPains: this.lowerBackPain,
+        };
 
-      const [year, month, day] = this.date.split("-");
+        const [year, month, day] = this.date.split("-");
 
-      await saveCondition(condition, this.userId, year, month, day).catch(
-        (err) => {
-          console.log(err);
+        await saveCondition(condition, this.userId, year, month, day).catch(
+          (err) => {
+            console.log(err);
+          }
+        );
+        this.backToDetailPage();
+      } catch (error) {
+        if (error instanceof Error) {
+          this.errorMessage = "エラーが起きました🙇‍♂️";
         }
-      );
+      }
     },
     backToDetailPage() {
       router.push(`/${this.date}`);
