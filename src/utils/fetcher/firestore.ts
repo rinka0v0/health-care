@@ -168,9 +168,6 @@ export const saveCondition = async (
   day: string
 ): Promise<void> => {
   try {
-    console.log(condition);
-    console.log(userId, year, month, day, "test!!");
-
     await setDoc(
       getConditionRef(userId, year, month, day),
       {
