@@ -1,21 +1,26 @@
 <template>
   <div v-if="!loading">
-    <div class="top">
-      <PrimaryButton value="⇦戻る" :onClick="backToDetailPage" class="back" />
+    <div :class="$style.top">
+      <PrimaryButton
+        value="⇦戻る"
+        :onClick="backToDetailPage"
+        :class="$style.back"
+      />
     </div>
     <h3>{{ date }}の記録</h3>
 
-    <div class="container">
-      <div class="temperature">
+    <div :class="$style.container">
+      <div :class="$style.temperature">
         <h3>体温</h3>
 
-        <div class="tmp-container">
+        <div :class="$style.tmp_container">
           <input
             step="0.1"
             type="number"
             id="temperature"
             placeholder="体温を入力"
             v-model="temperature"
+            @input="updateTemperature"
           />
           <div>℃</div>
         </div>
@@ -24,32 +29,30 @@
       <div>
         <h3>体調</h3>
         <div style="display: flex">
-          <PrimaryRadio
-            :options="conditions"
-            v-model="condition"
-            name="condition"
-          />
+          <div :class="$style.flex">
+            <CheckBox
+              :options="conditions"
+              name="condition"
+              v-model="condition"
+            />
+          </div>
         </div>
       </div>
 
       <div>
         <h3>頭痛</h3>
         <div style="display: flex">
-          <PrimaryRadio
-            :options="headaches"
-            v-model="headache"
-            name="headache"
-          />
+          <CheckBox :options="headaches" name="headache" v-model="headache" />
         </div>
       </div>
 
       <div>
         <h3>腰痛</h3>
         <div style="display: flex">
-          <PrimaryRadio
+          <CheckBox
             :options="lowerBackPains"
-            v-model="lowerBackPain"
             name="lowerBackPain"
+            v-model="lowerBackPain"
           />
         </div>
       </div>
@@ -57,13 +60,14 @@
       <div>
         <h3>めまい</h3>
         <div style="display: flex">
-          <PrimaryRadio :options="dizzies" v-model="dizzy" name="dizzy" />
+          <CheckBox :options="dizzies" name="dizzy" v-model="dizzy" />
         </div>
       </div>
+
       <PrimaryButton
         value="保存"
         :onClick="handleSave"
-        class="primary-button"
+        :class="$style.primary_button"
       />
 
       <div v-if="errorMessage">
@@ -95,6 +99,7 @@ import {
 } from "@/utils/fetcher/firestore";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import Loading from "@/components/Loading.vue";
+import CheckBox from "@/components/CheckBox.vue";
 
 @Options({
   components: {
@@ -102,6 +107,7 @@ import Loading from "@/components/Loading.vue";
     PrimaryRadio,
     ErrorMessage,
     Loading,
+    CheckBox,
   },
   data() {
     return {
@@ -109,31 +115,41 @@ import Loading from "@/components/Loading.vue";
       temperature: null,
 
       conditions,
-      condition: null,
+      condition: [],
 
       headaches,
-      headache: null,
+      headache: [],
 
       dizzies,
-      dizzy: null,
+      dizzy: [],
 
       lowerBackPains,
-      lowerBackPain: null,
+      lowerBackPain: [],
+
       errorMessage: "",
       loading: true,
     };
   },
   methods: {
+    updateTemperature(e: Event) {
+      if (e.target instanceof HTMLInputElement && e.target.value === "") {
+        this.temperature = null;
+      }
+    },
     async handleSave() {
       try {
         this.loading = true;
         const condition: Condition = {
-          temperature: this.temperature,
-          condition: this.condition,
-          headaches: this.headache,
-          dizzies: this.dizzy,
-          lowerBackPains: this.lowerBackPain,
+          temperature: isNaN(this.temperature) ? null : this.temperature,
+          condition: this.condition.length ? this.condition[0] : null,
+          headaches: this.headache.length ? this.headache[0] : null,
+          dizzies: this.dizzy.length ? this.dizzy[0] : null,
+          lowerBackPains: this.lowerBackPain.length
+            ? this.lowerBackPain[0]
+            : null,
         };
+
+        console.log(condition, "condition");
 
         const [year, month, day] = this.date.split("-");
 
@@ -162,7 +178,6 @@ import Loading from "@/components/Loading.vue";
   },
   async created() {
     const [year, month, day] = this.date.split("-");
-
     const fetchedCondition = await fetchCondition(
       this.userId,
       year,
@@ -170,12 +185,23 @@ import Loading from "@/components/Loading.vue";
       day
     );
     if (fetchedCondition) {
-      this.condition = parseInt(fetchedCondition.condition);
-      this.dizzy = parseInt(fetchedCondition.dizzies);
-      this.headache = parseInt(fetchedCondition.headaches);
-      this.lowerBackPain = parseInt(fetchedCondition.lowerBackPains);
+      if (fetchedCondition.condition != null) {
+        this.condition.push(parseInt(fetchedCondition.condition));
+      }
+      if (fetchedCondition.dizzies != null) {
+        this.dizzy.push(parseInt(fetchedCondition.dizzies));
+      }
+      if (fetchedCondition.headaches != null) {
+        this.headache.push(parseInt(fetchedCondition.headaches));
+      }
+      if (fetchedCondition.lowerBackPains != null) {
+        this.lowerBackPain.push(parseInt(fetchedCondition.lowerBackPains));
+      }
+      if (fetchedCondition.temperature != null) {
+        this.temperature = parseFloat(fetchedCondition.temperature);
+      }
+      console.log(fetchedCondition);
       // 体温は小数
-      this.temperature = parseFloat(fetchedCondition.temperature);
     }
     this.loading = false;
   },
@@ -183,7 +209,7 @@ import Loading from "@/components/Loading.vue";
 export default class Setting extends Vue {}
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" module>
 @keyframes radio-select {
   0% {
     transform: scale(0, 0);
@@ -233,7 +259,7 @@ h3 {
   align-items: center;
 }
 
-.tmp-container {
+.tmp_container {
   display: flex;
   align-items: center;
 }
@@ -261,7 +287,11 @@ input[type="number"] {
   box-sizing: border-box;
 }
 
-.primary-button {
+.primary_button {
   margin: 1em;
+}
+
+.flex {
+  display: flex;
 }
 </style>
