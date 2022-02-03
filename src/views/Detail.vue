@@ -78,6 +78,7 @@ import Memo from "@/components/Memo.vue";
 import { onSnapshot, DocumentData } from "@firebase/firestore";
 import { HEALTH_LABELS, HEALTH_ITEM_LIST } from "@/constants/index";
 import ConditionCard from "@/components/ConditionCard.vue";
+import { CreateComponentPublicInstance } from "@vue/runtime-core";
 
 @Options({
   components: {
@@ -117,6 +118,7 @@ import ConditionCard from "@/components/ConditionCard.vue";
       const data = await fetchCondition(this.userId, year, month, day);
       if (data) {
         this.healthInfo = data;
+        console.log(this.healthInfo);
       }
     } catch (error) {
       console.error(error);
@@ -136,7 +138,11 @@ import ConditionCard from "@/components/ConditionCard.vue";
       if (this.healthInfo) {
         const validKeys: string[] = [];
         Object.keys(HEALTH_LABELS).map((key) => {
-          if (this.healthInfo[key]) {
+          if (this.healthInfo[key] != null && key !== "temperature") {
+            console.log(this.healthInfo[key] !== "", key);
+
+            validKeys.push(key);
+          } else if (this.healthInfo[key]) {
             validKeys.push(key);
           }
         });
