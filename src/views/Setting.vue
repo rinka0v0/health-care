@@ -1,65 +1,79 @@
 <template>
-  <div class="top">
-    <PrimaryButton value="⇦戻る" :onClick="backToDetailPage" class="back" />
+  <div v-if="!loading">
+    <div class="top">
+      <PrimaryButton value="⇦戻る" :onClick="backToDetailPage" class="back" />
+    </div>
+    <h3>{{ date }}の記録</h3>
+
+    <div class="container">
+      <div class="temperature">
+        <h3>体温</h3>
+
+        <div class="tmp-container">
+          <input
+            step="0.1"
+            type="number"
+            id="temperature"
+            placeholder="体温を入力"
+            v-model="temperature"
+          />
+          <div>℃</div>
+        </div>
+      </div>
+
+      <div>
+        <h3>体調</h3>
+        <div style="display: flex">
+          <PrimaryRadio
+            :options="conditions"
+            v-model="condition"
+            name="condition"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3>頭痛</h3>
+        <div style="display: flex">
+          <PrimaryRadio
+            :options="headaches"
+            v-model="headache"
+            name="headache"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3>腰痛</h3>
+        <div style="display: flex">
+          <PrimaryRadio
+            :options="lowerBackPains"
+            v-model="lowerBackPain"
+            name="lowerBackPain"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3>めまい</h3>
+        <div style="display: flex">
+          <PrimaryRadio :options="dizzies" v-model="dizzy" name="dizzy" />
+        </div>
+      </div>
+      <PrimaryButton
+        value="保存"
+        :onClick="handleSave"
+        class="primary-button"
+      />
+
+      <div v-if="errorMessage">
+        <ErrorMessage :message="errorMessage" />
+      </div>
+    </div>
   </div>
-  <h3>{{ date }}の記録</h3>
 
-  <div class="container">
-    <div class="temperature">
-      <h3>体温</h3>
-
-      <div class="tmp-container">
-        <input
-          step="0.1"
-          type="number"
-          id="temperature"
-          placeholder="体温を入力"
-          v-model="temperature"
-        />
-        <div>℃</div>
-      </div>
-    </div>
-
-    <div>
-      <h3>体調</h3>
-      <div style="display: flex">
-        <PrimaryRadio
-          :options="conditions"
-          v-model="condition"
-          name="condition"
-        />
-      </div>
-    </div>
-
-    <div>
-      <h3>頭痛</h3>
-      <div style="display: flex">
-        <PrimaryRadio :options="headaches" v-model="headache" name="headache" />
-      </div>
-    </div>
-
-    <div>
-      <h3>腰痛</h3>
-      <div style="display: flex">
-        <PrimaryRadio
-          :options="lowerBackPains"
-          v-model="lowerBackPain"
-          name="lowerBackPain"
-        />
-      </div>
-    </div>
-
-    <div>
-      <h3>めまい</h3>
-      <div style="display: flex">
-        <PrimaryRadio :options="dizzies" v-model="dizzy" name="dizzy" />
-      </div>
-    </div>
-    <PrimaryButton value="保存" :onClick="handleSave" class="primary-button" />
-
-    <div v-if="errorMessage">
-      <ErrorMessage :message="errorMessage" />
-    </div>
+  <div v-else>
+    <Loading />
   </div>
 </template>
 
@@ -80,12 +94,14 @@ import {
   saveCondition,
 } from "@/utils/fetcher/firestore";
 import ErrorMessage from "@/components/ErrorMessage.vue";
+import Loading from "@/components/Loading.vue";
 
 @Options({
   components: {
     PrimaryButton,
     PrimaryRadio,
     ErrorMessage,
+    Loading,
   },
   data() {
     return {
@@ -104,11 +120,13 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
       lowerBackPains,
       lowerBackPain: null,
       errorMessage: "",
+      loading: true,
     };
   },
   methods: {
     async handleSave() {
       try {
+        this.loading = true;
         const condition: Condition = {
           temperature: this.temperature,
           condition: this.condition,
@@ -129,6 +147,8 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
         if (error instanceof Error) {
           this.errorMessage = "エラーが起きました🙇‍♂️";
         }
+      } finally {
+        this.loading = false;
       }
     },
     backToDetailPage() {
@@ -157,6 +177,7 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
       // 体温は小数
       this.temperature = parseFloat(fetchedCondition.temperature);
     }
+    this.loading = false;
   },
 })
 export default class Setting extends Vue {}
