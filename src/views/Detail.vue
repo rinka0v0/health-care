@@ -75,7 +75,13 @@ import {
 } from "@/utils/fetcher/firestore";
 import Loading from "@/components/Loading.vue";
 import Memo from "@/components/Memo.vue";
-import { onSnapshot, DocumentData } from "@firebase/firestore";
+import {
+  onSnapshot,
+  DocumentData,
+  query,
+  where,
+  orderBy,
+} from "@firebase/firestore";
 import { HEALTH_LABELS, HEALTH_ITEM_LIST } from "@/constants/index";
 import ConditionCard from "@/components/ConditionCard.vue";
 import { CreateComponentPublicInstance } from "@vue/runtime-core";
@@ -104,16 +110,17 @@ import { CreateComponentPublicInstance } from "@vue/runtime-core";
   async created() {
     try {
       const [year, month, day] = this.param.split("-");
-      onSnapshot(
+      const q = query(
         getMemosRef(this.userId, year, month, day),
-        (querySnapshot) => {
-          const memos: DocumentData[] = [];
-          querySnapshot.forEach((doc) => {
-            memos.push({ content: doc.data().content });
-          });
-          this.memos = memos;
-        }
+        orderBy("createdAt", "asc")
       );
+      onSnapshot(q, (querySnapshot) => {
+        const memos: DocumentData[] = [];
+        querySnapshot.forEach((doc) => {
+          memos.push({ content: doc.data().content });
+        });
+        this.memos = memos;
+      });
 
       const data = await fetchCondition(this.userId, year, month, day);
       if (data) {
