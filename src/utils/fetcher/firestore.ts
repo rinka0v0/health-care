@@ -15,13 +15,13 @@ import {
 } from "firebase/firestore";
 
 export const defaultConditions = {
-  "1": 1,
+  "1": 0,
   "2": 0,
   "3": 0,
   "4": 0,
   "5": 0,
   "6": 0,
-  "7": 1,
+  "7": 0,
   "8": 0,
   "9": 0,
   "10": 0,
@@ -37,7 +37,7 @@ export const defaultConditions = {
   "20": 0,
   "21": 0,
   "22": 0,
-  "23": 1,
+  "23": 0,
   "24": 0,
   "25": 0,
   "26": 0,
@@ -66,24 +66,22 @@ export const fetchConditions = async (
     userId,
     "years",
     year,
-    "month",
-    month
+    "months",
+    month,
+    "days"
   );
 
-  const snapshot = await getDocs(
-    query(monthRef, where("condition", "!=", "null"))
-  );
+  const snapshot = await getDocs(query(monthRef, where("condition", "==", 2)));
 
   const conditions = { ...defaultConditions };
 
   snapshot.forEach((doc) => {
     const data = doc.data() as ConditionData;
+    const id = doc.id as DateNumber;
     if (data.condition) {
-      conditions[data.date] = data.condition;
+      conditions[id] = data.condition;
     }
   });
-  console.log(conditions, "conditions");
-
   return conditions;
 };
 

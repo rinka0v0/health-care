@@ -1,40 +1,54 @@
 <template>
-  <h2 style="margin: 0">{{ displayMonth }}</h2>
-  <div class="button-container">
-    <PrimaryButton value="前の月" :onClick="prevMonth" class="primary-button" />
-    <PrimaryButton value="次の月" :onClick="nextMonth" class="primary-button" />
-  </div>
-
-  <div style="display: flex">
-    <div class="calendar-youbi" v-for="n in 7" :key="n">
-      {{ calcyoubi(n - 1) }}
+  <div v-if="!loading">
+    <h2 style="margin: 0">{{ displayMonth }}</h2>
+    <div class="button-container">
+      <PrimaryButton
+        value="前の月"
+        :onClick="prevMonth"
+        class="primary-button"
+      />
+      <PrimaryButton
+        value="次の月"
+        :onClick="nextMonth"
+        class="primary-button"
+      />
     </div>
-  </div>
 
-  <div v-for="(week, index) in calendars" :key="index" class="calendar">
-    <div class="row">
-      <div
-        v-for="(day, index) in week"
-        :key="index"
-        v-on:click="routerPush(day.month, day.date)"
-        :class="{
-          outside: currentMonth !== day.month,
-          today:
-            thisMonth === currentMonth &&
-            today === day.date &&
-            currentMonth === day.month,
-        }"
-      >
-        {{ day.date }}
-
-        <!-- <div
-          class="content"
-          v-if="conditions[day.date.toString()] && day.month === currentMonth"
-        >
-          😵
-        </div> -->
+    <div style="display: flex">
+      <div class="calendar-youbi" v-for="n in 7" :key="n">
+        {{ calcyoubi(n - 1) }}
       </div>
     </div>
+
+    <div v-for="(week, index) in calendars" :key="index" class="calendar">
+      <div class="row">
+        <div
+          v-for="(day, index) in week"
+          :key="index"
+          v-on:click="routerPush(day.month, day.date)"
+          :class="{
+            outside: currentMonth !== day.month,
+            today:
+              thisMonth === currentMonth &&
+              today === day.date &&
+              currentMonth === day.month,
+          }"
+        >
+          {{ day.date }}
+
+          <div
+            class="content"
+            v-if="conditions[day.date.toString()] && day.month === currentMonth"
+          >
+            😵
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else>
+    <Loading />
   </div>
 </template>
 
@@ -44,15 +58,20 @@ import moment from "moment";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import router from "@/router";
 import Loading from "@/components/Loading.vue";
+import { fetchConditions } from "@/utils/fetcher/firestore";
 
 @Options({
-  // props: ["conditions"],
   data() {
     return {
       currentDate: moment(),
+      conditions: {},
+      loading: true,
     };
   },
   computed: {
+    userId() {
+      return this.$store.state.auth.userId;
+    },
     calendars() {
       return this.getCalendar();
     },
@@ -67,6 +86,24 @@ import Loading from "@/components/Loading.vue";
     },
     today() {
       return parseInt(moment().format("D"));
+    },
+    year() {
+      return this.currentDate.format("YYYY");
+    },
+    month() {
+      return this.currentDate.format("MM");
+    },
+  },
+  watch: {
+    currentDate: async function () {
+      this.loading = true;
+      const conditions = await fetchConditions(
+        this.$store.state.auth.userId,
+        this.currentDate.format("YYYY"),
+        this.currentDate.format("MM")
+      );
+      this.conditions = conditions;
+      this.loading = false;
     },
   },
   methods: {
@@ -108,7 +145,6 @@ import Loading from "@/components/Loading.vue";
       this.currentDate = moment(this.currentDate).subtract(1, "month");
     },
     routerPush(month: string, day: string) {
-      console.log(month + "-" + day);
       router.push(`/${month + "-" + day}`);
     },
     calcyoubi(dayIndex: number) {
@@ -116,8 +152,14 @@ import Loading from "@/components/Loading.vue";
       return week[dayIndex];
     },
   },
-  mounted() {
-    console.log(this.getCalendar());
+  async created() {
+    const conditions = await fetchConditions(
+      this.$store.state.auth.userId,
+      this.currentDate.format("YYYY"),
+      this.currentDate.format("MM")
+    );
+    this.conditions = conditions;
+    this.loading = false;
   },
   components: {
     PrimaryButton,
@@ -159,7 +201,6 @@ export default class Calendar extends Vue {}
 }
 .outside {
   background-color: #ddd;
-  /* background-color: #f7f7f7; */
 }
 .today {
   background-color: #efd7d3;
@@ -172,5 +213,6 @@ export default class Calendar extends Vue {}
 .content {
   width: 100%;
   height: 100%;
+  font-size: 2.5rem;
 }
 </style>

@@ -75,17 +75,9 @@ import {
 } from "@/utils/fetcher/firestore";
 import Loading from "@/components/Loading.vue";
 import Memo from "@/components/Memo.vue";
-import {
-  onSnapshot,
-  DocumentData,
-  query,
-  where,
-  orderBy,
-} from "@firebase/firestore";
+import { onSnapshot, DocumentData, query, orderBy } from "@firebase/firestore";
 import { HEALTH_LABELS, HEALTH_ITEM_LIST } from "@/constants/index";
 import ConditionCard from "@/components/ConditionCard.vue";
-import { CreateComponentPublicInstance } from "@vue/runtime-core";
-
 @Options({
   components: {
     PrimaryButton,
