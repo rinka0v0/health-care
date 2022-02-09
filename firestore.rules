@@ -26,7 +26,7 @@ service cloud.firestore {
 
                 allow delete: if isUserAuthenticated(userId)
 
-                match /months/{mouth} {
+                match /months/{month} {
                     allow read: if isUserAuthenticated(userId)
 
                     allow create: if isUserAuthenticated(userId)
