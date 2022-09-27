@@ -71,7 +71,7 @@ export const fetchConditions = async (
     "days"
   );
 
-  const snapshot = await getDocs(query(monthRef, where("condition", "==", 2)));
+  const snapshot = await getDocs(query(monthRef));
 
   const conditions = { ...defaultConditions };
 
