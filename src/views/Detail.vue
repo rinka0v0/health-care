@@ -12,7 +12,7 @@
         <div class="health-info" v-if="key !== 'temperature'">
           <conditionCard
             :label="LABELS[key]"
-            :contentData="HEALTH_ITEM_LIST[key][healthInfo[key]]['label']"
+            :contentData="HEALTH_ITEM_LIST[key][healthInfo[key] - 1]['label']"
           />
         </div>
         <div class="health-info" v-else>
@@ -117,7 +117,6 @@ import ConditionCard from "@/components/ConditionCard.vue";
       const data = await fetchCondition(this.userId, year, month, day);
       if (data) {
         this.healthInfo = data;
-        console.log(this.healthInfo);
       }
     } catch (error) {
       console.error(error);
