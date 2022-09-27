@@ -35,7 +35,6 @@
           }"
         >
           {{ day.date }}
-          {{ conditions[day.date.toString()] }}
 
           <div
             class="content"
