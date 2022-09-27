@@ -35,12 +35,34 @@
           }"
         >
           {{ day.date }}
+          {{ conditions[day.date.toString()] }}
 
           <div
             class="content"
-            v-if="conditions[day.date.toString()] && day.month === currentMonth"
+            v-if="
+              conditions[day.date.toString()] == '3' &&
+              day.month === currentMonth
+            "
           >
             😵
+          </div>
+          <div
+            class="content"
+            v-if="
+              conditions[day.date.toString()] == '2' &&
+              day.month === currentMonth
+            "
+          >
+            🙂
+          </div>
+          <div
+            class="content"
+            v-if="
+              conditions[day.date.toString()] == '1' &&
+              day.month === currentMonth
+            "
+          >
+            😁
           </div>
         </div>
       </div>
@@ -59,6 +81,7 @@ import PrimaryButton from "@/components/PrimaryButton.vue";
 import router from "@/router";
 import Loading from "@/components/Loading.vue";
 import { fetchConditions } from "@/utils/fetcher/firestore";
+import { conditionsFace } from "@/constants";
 
 @Options({
   data() {
